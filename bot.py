@@ -35,7 +35,7 @@ async def handle_message(message: types.Message):
         f"Новое сообщение:\n\n{message.text}\n\nОт: @{user}"
     )
 
-# мини веб-сервер, чтобы Render видел открытый порт и не падал
+
 async def health(request):
     return web.Response(text="OK")
 
@@ -48,7 +48,7 @@ async def run_web():
     await web.TCPSite(runner, "0.0.0.0", port).start()
 
 async def main():
-    await run_web()                # поднимаем порт
-    await dp.start_polling(bot)    # запускаем бота
+    await run_web()                
+    await dp.start_polling(bot)    
 
 asyncio.run(main())
