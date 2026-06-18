@@ -1,13 +1,20 @@
 import asyncio
 import os
 from aiogram import Bot, Dispatcher, types, F
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from aiohttp import web
 
-TOKEN = os.environ["BOT_TOKEN"]                       # токен берём из переменной Render
+TOKEN = os.environ["BOT_TOKEN"]
 ADMIN_ID = int(os.environ.get("ADMIN_ID", "671141387"))
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
+
+
+def main_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="📢 Наш канал SIZIF MEDIA", url="https://t.me/sizifmedia")],
+    ])
 
 @dp.message(F.text == "/start")
 async def start(message: types.Message):
@@ -19,7 +26,8 @@ async def start(message: types.Message):
         "— предложить тему для поста\n"
         "— просто написать, если стало невыносимо смешно или грустно\n\n"
         "Мы читаем всё. Иногда молча киваем, иногда пишем пост.\n\n"
-        "Камень сам себя не покатит, давай, рассказывай 🪨"
+        "Камень сам себя не покатит, давай, рассказывай 🪨",
+        reply_markup=main_kb(),
     )
 
 @dp.message()
@@ -27,7 +35,8 @@ async def handle_message(message: types.Message):
     await message.answer(
         "Получили, спасибо 🪨\n\n"
         "Твоя история уже где-то в середине горы — читаем, думаем, возможно скоро она станет постом.\n"
-        "Катим дальше."
+        "Катим дальше.",
+        reply_markup=main_kb(),
     )
     user = message.from_user.username or "без username"
     await bot.send_message(
@@ -48,7 +57,7 @@ async def run_web():
     await web.TCPSite(runner, "0.0.0.0", port).start()
 
 async def main():
-    await run_web()                
-    await dp.start_polling(bot)    
+    await run_web()
+    await dp.start_polling(bot)
 
 asyncio.run(main())
