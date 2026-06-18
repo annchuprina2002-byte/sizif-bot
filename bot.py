@@ -1,13 +1,14 @@
-from aiogram import Bot, Dispatcher, types, F
 import asyncio
+import os
+from aiogram import Bot, Dispatcher, types, F
+from aiohttp import web
 
-TOKEN = "8553426786:AAHFhykr2-wkdxhF6JDy2dx24WEM43iQBtI"
-ADMIN_ID = 671141387
+TOKEN = os.environ["BOT_TOKEN"]                       # токен берём из переменной Render
+ADMIN_ID = int(os.environ.get("ADMIN_ID", "671141387"))
 
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# /start (НОВЫЙ СИНТАКСИС)
 @dp.message(F.text == "/start")
 async def start(message: types.Message):
     await message.answer(
@@ -28,14 +29,26 @@ async def handle_message(message: types.Message):
         "Твоя история уже где-то в середине горы — читаем, думаем, возможно скоро она станет постом.\n"
         "Катим дальше."
     )
-
     user = message.from_user.username or "без username"
     await bot.send_message(
         ADMIN_ID,
         f"Новое сообщение:\n\n{message.text}\n\nОт: @{user}"
     )
 
+# мини веб-сервер, чтобы Render видел открытый порт и не падал
+async def health(request):
+    return web.Response(text="OK")
+
+async def run_web():
+    app = web.Application()
+    app.router.add_get("/", health)
+    runner = web.AppRunner(app)
+    await runner.setup()
+    port = int(os.environ.get("PORT", "10000"))
+    await web.TCPSite(runner, "0.0.0.0", port).start()
+
 async def main():
-    await dp.start_polling(bot)
+    await run_web()                # поднимаем порт
+    await dp.start_polling(bot)    # запускаем бота
 
 asyncio.run(main())
